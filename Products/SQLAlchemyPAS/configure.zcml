@@ -1,0 +1,19 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    i18n_domain="Products.SQLAlchemyPAS">
+
+
+    <utility factory=".encryption.NoEncryption"
+             provides=".encryption.IEncryptionPolicy"
+             name="none" />
+
+    <utility factory=".encryption.MD5HexEncryption"
+             provides=".encryption.IEncryptionPolicy"
+             name="md5-hex" />
+
+    <utility factory=".encryption.SHAHexEncryption"
+             provides=".encryption.IEncryptionPolicy"
+             name="sha-hex" />
+
+</configure>
