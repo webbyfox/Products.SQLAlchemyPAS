@@ -1,0 +1,20 @@
+Changelog
+=========
+
+1.1dev (unreleased)
+-------------------
+
+- Nothing changed yet.
+
+1.0 (2011-07-11)
+----------------
+
+* added password encryption policies
+
+* Plone 4 compatibility
+
+0.1 - Unreleased
+----------------
+
+* Initial release
+

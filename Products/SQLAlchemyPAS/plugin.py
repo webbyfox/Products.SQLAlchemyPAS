@@ -5,7 +5,7 @@ import DateTime
 from zope.interface import implements
 from zope import component
 from sqlalchemy import orm, sql, Table, MetaData
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exceptions import SQLAlchemyError
 
 try:
     # >= Plone 4
@@ -28,34 +28,6 @@ from encryption import IEncryptionPolicy
 
 from z3c.saconfig.interfaces import IScopedSession
 from z3c.saconfig.scopedsession import named_scoped_session
-from AccessControl.SecurityManagement import getSecurityManager
-
-from Products.PluggableAuthService.utils import classImplements
-
-# Pluggable Auth Service
-from Products.PluggableAuthService.interfaces.plugins import (
-    IUserAdderPlugin,
-    IRolesPlugin,
-    IGroupsPlugin,
-    IPropertiesPlugin,
-    IAuthenticationPlugin,
-    IUserEnumerationPlugin,
-    IRoleAssignerPlugin,
-    IGroupEnumerationPlugin
-    )
-
-# PlonePAS
-from Products.PlonePAS.interfaces.plugins import IUserManagement
-from Products.PlonePAS.interfaces.capabilities import IDeleteCapability
-from Products.PlonePAS.interfaces.capabilities import IPasswordSetCapability
-from Products.PlonePAS.interfaces.capabilities import IAssignRoleCapability
-from Products.PlonePAS.interfaces.capabilities import IGroupCapability
-from Products.PlonePAS.interfaces.plugins import IMutablePropertiesPlugin
-from Products.PlonePAS.interfaces.group import IGroupIntrospection
-from Products.PlonePAS.interfaces.group import IGroupManagement
-from Products.PlonePAS.sheet import MutablePropertySheet
-from Products.PlonePAS.plugins.group import PloneGroup
-
 
 manage_addSQLAlchemyPASPluginForm = PageTemplateFile('plugin', globals())
 
@@ -111,14 +83,12 @@ def reset_model(session_name, table_name):
 
 
 class SQLAlchemyPASPlugin(BasePlugin):
-    security = ClassSecurityInfo()
     implements(
         pas.IAuthenticationPlugin,
         pas.IUserEnumerationPlugin,
         pas.IPropertiesPlugin,
         pas.IUserAdderPlugin,
         pas.ICredentialsUpdatePlugin,
-        pas.IGroupsPlugin, # Added by Riz
         plonepas.IUserManagement,
         capabilities.IPasswordSetCapability,
         capabilities.IDeleteCapability,
@@ -240,11 +210,12 @@ class SQLAlchemyPASPlugin(BasePlugin):
         user = self._getUserByLogin(login)
         if user is None:
             return None
+
         if self.encryptPassword(password) == getattr(user, self.password_column).encode('hex'):
             login = getattr(user, self.login_column)
             userid = getattr(user, self.userid_column)
             return userid, login
-             
+
     def _getUserByLogin(self, login):
         if self.isPrimaryKey(self.login_column):
             # userid column is primary key, lookup cached per request
@@ -368,7 +339,7 @@ class SQLAlchemyPASPlugin(BasePlugin):
                 self.hold(db_user)
                 return SAMutablePropertySheet(db_user, self)
 
-        except (ValueError, SQLAlchemyError):	
+        except (ValueError, SQLAlchemyError):
             return None # not setup yet
 
     def doAddUser(self, login, password):
@@ -394,21 +365,6 @@ class SQLAlchemyPASPlugin(BasePlugin):
     # The PlonePAS methods
     #
 
-    # Fetching groups from SIMS custom method added by Riz(rmansuri@rcseng.ac.uk)	
-	security.declarePrivate('getGroupsForPrincipal')
-	@graceful_recovery(())
-	def getGroupsForPrincipal(self, principal, request=None):
-	    "Getting groups from SIMS"
-	    principal = '1048836'
-	    import pdb; pdb.set_trace()
-	    groups = []
-	    results = self.simsGroupForUser(username=principal)
-	    for row in results.dictionaries():
-	    	group = row.get('group')
-	    	groups.append(group)
-	    	return groups    
-
-	
     def doChangeUser(self, login, password, **kw):
         """
         Change a user's password (differs from role) roles are set in
@@ -445,6 +401,3 @@ class SQLAlchemyPASPlugin(BasePlugin):
     def listEncryptionPolicies(self):
 
         return [n for n, u in component.getUtilitiesFor(IEncryptionPolicy)]
-
-classImplements(pas.IGroupsPlugin,)  
-InitializeClass(SQLAlchemyPASPlugin)      
