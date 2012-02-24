@@ -5,7 +5,7 @@ import DateTime
 from zope.interface import implements
 from zope import component
 from sqlalchemy import orm, sql, Table, MetaData
-from sqlalchemy.exceptions import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError
 
 try:
     # >= Plone 4
