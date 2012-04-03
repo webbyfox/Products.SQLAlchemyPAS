@@ -210,7 +210,7 @@ class SQLAlchemyPASPlugin(BasePlugin):
         user = self._getUserByLogin(login)
         if user is None:
             return None
-
+        import pdb; pdb.set_trace()
         if self.encryptPassword(password) == getattr(user, self.password_column).encode('hex'):
             login = getattr(user, self.login_column)
             userid = getattr(user, self.userid_column)

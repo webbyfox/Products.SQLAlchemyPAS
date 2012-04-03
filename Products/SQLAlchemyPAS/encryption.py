@@ -1,6 +1,7 @@
 from zope.interface import Interface, implements
-from md5 import md5
-import sha 
+import hashlib
+#from md5 import md5
+#import sha 
 
 class IEncryptionPolicy(Interface):
 
@@ -20,7 +21,7 @@ class MD5HexEncryption(object):
     implements(IEncryptionPolicy)
 
     def encryptPassword(self, password):
-        return md5(password).hexdigest()
+        return hashlib.md5(password).hexdigest()
 
 
 class SHAHexEncryption(object):
@@ -28,4 +29,5 @@ class SHAHexEncryption(object):
     implements(IEncryptionPolicy)
 
     def encryptPassword(self, password):
-        return sha.sha(password).hexdigest()
+        return hashlib.sha1(password).hexdigest()
+    
